@@ -1,0 +1,95 @@
+---
+title: "Untitled"
+author: "Mustafa Telab"
+date: "10/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE}
+library(plotly)
+library(shiny)
+library(tidyverse)
+```
+
+
+Module 3
+I have provided you with data about mortality from all 50 states and the District of Columbia.
+Please access it at
+https://github.com/charleyferrari/CUNY_DATA608/tree/master/module3/data You are
+invited to gather more data from our provider, the CDC WONDER system, at
+https://wonder.cdc.gov/ucd-icd10.html .
+● This assignment must be done in R. It must be done using the ‘shiny’ package.
+● It is recommended you use an R package that supports interactive graphing such as
+plotly, or vegalite, but this is not required.
+● Your apps must be deployed, I won’t be accepting raw files. Luckily, you can pretty
+easily deploy apps with a free account at shinyapps.io
+
+```{r,message=FALSE}
+#IMPORT DATA
+df = read_csv("https://raw.githubusercontent.com/charleyferrari/CUNY_DATA_608/master/module3/data/cleaned-cdc-mortality-1999-2010-2.csv")
+
+```
+
+```{r}
+#CALCULATE RATE
+df['rate'] = round((df['Deaths']/df['Population'])*1000,digits = 3)
+#CREATE UNIQUE LISTS FOR DROP DOWN OPTIONS
+causes = unique(df[1])
+geos = unique(df[2])
+```
+
+Question 1:
+As a researcher, you frequently compare mortality rates from particular causes across
+different States. You need a visualization that will let you see (for 2010 only) the crude
+mortality rate, across all States, from one cause (for example, Neoplasms, which are
+effectively cancers). Create a visualization that allows you to rank States by crude mortality
+for each cause of death.
+
+```{r}
+ui <- fluidPage(
+selectInput(inputId = "causes",label = "Select Mortality",choices = causes ),
+plotOutput('hist')
+)
+server = function(input,output){
+  output$hist = renderPlot({
+dfsub%>%
+      filter(ICD.Chapter == input$causes)%>%
+          ggplot(aes(x = reorder(State,Crude.Rate), y = Crude.Rate)) + 
+            geom_bar(stat = 'identity') +
+            xlab("")+
+            ylab("Deaths")+
+            coord_flip() 
+  })
+}
+shinyApp(ui = ui, server = server)
+```
+
+Question 2:
+Often you are asked whether particular States are improving their mortality rates (per cause)
+faster than, or slower than, the national average. Create a visualization that lets your clients
+see this for themselves for one cause of death at the time. Keep in mind that the national
+average should be weighted by the national population.
+
+```{r}
+ui <- fluidPage(
+selectInput(inputId = "causes",label = "Select Mortality",choices = causes ),
+selectInput(inputId = "State",label = "Select State",choices = geos),
+plotOutput('hist')
+)
+server = function(input,output){
+  output$hist = renderPlot({
+    df%>%
+      filter(ICD.Chapter == input$causes, State == input$State)%>%
+          ggplot(aes(x = Year, y = Crude.Rate)) + 
+            geom_line(stat = 'identity') +
+            xlab("")+
+            ylab("Deaths")
+  })
+}
+shinyApp(ui = ui, server = server)
+```
+
