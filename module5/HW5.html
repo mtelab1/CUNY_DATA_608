@@ -1,0 +1,25 @@
+<html>  
+<head>  
+</head>  
+<body>  
+
+        <input type = "text" id = "yourtext"> 
+
+    <script type = "text/javascript">  
+        function reverse(x){   
+            var x = document.getElementById('yourtext');
+            len = x.length;
+                for (var n= 1; n < len;  n++) {
+                    var loc = len-n;
+                    r = r+x[loc];
+                }
+                r.innerHTML=reverseText(document.getElementById("result").value);
+            } 
+    </script>  
+<p>Click to reverse
+    <input type = "button" onclick = "reverse()" value = "GO" onclick="reverse()">  
+    <output name="x" for="result">   </output> </form>
+</p>  
+
+</body>  
+</html> 
